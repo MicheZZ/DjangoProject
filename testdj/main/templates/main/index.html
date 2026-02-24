@@ -1,0 +1,40 @@
+{% extends 'main/layout.html' %}
+
+{% block title %}Главная страница{% endblock %}
+
+{% block content %}
+<main>
+    <div class="features">
+        <h1>Добро пожаловать в коллекцию pet‑проектов</h1>
+        <p class="lead">
+            Здесь собраны небольшие, но живые проекты: угадывание чисел, BlackJack, генератор паролей,
+            предсказатель судьбы и конвертер чисел между различными системами счисления.
+        </p>
+        <p>
+            Используйте сайт как песочницу: тестируйте идеи, пробуйте новые технологии и просто получайте удовольствие
+            от кодинга. Со временем здесь появятся новые игры, утилиты и обучающие эксперименты.
+        </p>
+        {% if not user.is_authenticated %}
+            <p class="mt-4">
+                Хочется сохранить прогресс и настройки? Войдите в аккаунт или зарегистрируйтесь — это займёт меньше минуты.
+            </p>
+            <a href="{% url 'register' %}" class="btn btn-primary btn-lg mr-2">
+                <i class="fa-regular fa-user"></i> Создать аккаунт
+            </a>
+            <a href="{% url 'login' %}" class="btn btn-outline-secondary btn-lg">
+                <i class="fa-solid fa-right-to-bracket"></i> Войти
+            </a>
+        {% else %}
+            <p class="mt-4">
+                {{ user.username }}, добро пожаловать обратно! Выберите раздел слева, чтобы продолжить работу с проектами.
+            </p>
+            <a href="{% url 'games:games' %}" class="btn btn-success btn-lg mr-2">
+                <i class="fa-solid fa-gamepad"></i> Перейти к играм
+            </a>
+            <a href="{% url 'others:others' %}" class="btn btn-outline-primary btn-lg">
+                <i class="fa-solid fa-boxes-stacked"></i> Остальные проекты
+            </a>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}

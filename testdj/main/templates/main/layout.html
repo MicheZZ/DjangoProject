@@ -1,0 +1,189 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+          integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N"
+          crossorigin="anonymous">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://kit.fontawesome.com/92d53ef251.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{% static 'main/css/main.css' %}">
+</head>
+<body>
+    <!-- Кнопка мобильного меню -->
+    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Overlay для закрытия меню на мобильных -->
+    <div class="mobile-overlay" onclick="toggleMobileMenu()"></div>
+
+    <aside id="sidebar">
+        <div class="aside-header">
+            <img src="{% static 'main/img/river.jpg' %}" alt="Лого">
+            <span class="logo">ccwwan</span>
+        </div>
+
+        <h3>Навигация</h3>
+        <ul>
+            <a href="{% url 'home' %}">
+                <li class="{% if request.path == '/' %}active{% endif %}">
+                    <i class="fa-regular fa-house"></i> Главная
+                </li>
+            </a>
+            <a href="{% url 'games:games' %}">
+                <li class="{% if '/games/' in request.path %}active{% endif %}">
+                    <i class="fa-solid fa-gamepad"></i> Игры
+                </li>
+            </a>
+            <a href="{% url 'others:others' %}">
+                <li class="{% if '/others/' in request.path %}active{% endif %}">
+                    <i class="fa-solid fa-boxes-stacked"></i> Остальное
+                </li>
+            </a>
+            <a href="{% url 'contacts' %}">
+                <li class="{% if '/contacts/' in request.path %}active{% endif %}">
+                    <i class="fa-regular fa-envelope"></i> Контакты
+                </li>
+            </a>
+        </ul>
+
+        <div class="aside-footer">
+            {% if user.is_authenticated %}
+                <div style="text-align: center; margin-bottom: 15px; padding: 10px 15px; border-bottom: 1px solid #3a3a3a;">
+                    <p style="font-size: 11px; color: #777; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin: 0 0 8px 0; text-align: center;">
+                        Вы вошли как
+                    </p>
+                    <p style="font-size: 14px; color: #fff; font-weight: 700; margin: 0 0 12px 0; letter-spacing: 0.5px; text-align: center; word-break: break-all;">
+                        {% if user.profile %}{{ user.profile.avatar }} {% endif %}@{{ user.username }}
+                    </p>
+
+                    <!-- Баланс пользователя -->
+                    <div style="background: linear-gradient(135deg, #1f3a1f, #2a4d2a); border: 2px solid #4CAF50; border-radius: 10px; padding: 12px; margin-top: 12px; box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);">
+                        <p style="font-size: 10px; color: #a5d6a7; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 5px 0; font-weight: 700;">
+                            💰 Баланс
+                        </p>
+                        <p style="font-size: 20px; color: #4CAF50; font-weight: 900; margin: 0; font-family: 'Courier New', monospace;">
+                            {{ user.profile.balance }}
+                        </p>
+                    </div>
+                </div>
+
+                <a href="{% url 'profile' %}" class="btn btn-sm btn-outline-light btn-block mb-2">
+                    <i class="fa-regular fa-user"></i> Профиль
+                </a>
+
+                <form action="{% url 'logout' %}" method="post" class="mt-2">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-danger btn-block">
+                        <i class="fa-solid fa-right-from-bracket"></i> Выйти
+                    </button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-sm btn-primary btn-block mb-2">
+                    <i class="fa-solid fa-right-to-bracket"></i> Войти
+                </a>
+                <a href="{% url 'register' %}" class="btn btn-sm btn-outline-light btn-block">
+                    <i class="fa-regular fa-user"></i> Регистрация
+                </a>
+            {% endif %}
+        </div>
+    </aside>
+
+    <!-- Сообщения Django -->
+    {% if messages %}
+        <div class="messages-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 400px;">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show"
+                     style="background: {% if message.tags == 'success' %}linear-gradient(135deg, #1f3a1f, #2a4d2a){% else %}linear-gradient(135deg, #3a1f1f, #4d2a2a){% endif %};
+                            border: 2px solid {% if message.tags == 'success' %}#4CAF50{% else %}#ff6b6b{% endif %};
+                            color: {% if message.tags == 'success' %}#4CAF50{% else %}#ff9999{% endif %};
+                            border-radius: 10px; padding: 15px 20px; margin-bottom: 10px;
+                            box-shadow: 0 6px 20px rgba(0,0,0,0.5); font-weight: 600; font-size: 14px;">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" style="color: inherit; opacity: 0.9; font-size: 20px;">
+                        <span>&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Функция переключения мобильного меню
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.mobile-overlay');
+            const menuBtn = document.querySelector('.mobile-menu-toggle');
+
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
+
+            // Меняем иконку
+            const icon = menuBtn.querySelector('i');
+            if (sidebar.classList.contains('mobile-open')) {
+                icon.className = 'fas fa-times';
+            } else {
+                icon.className = 'fas fa-bars';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Автоматическое скрытие уведомлений через 5 секунд
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    $(alert).alert('close');
+                });
+            }, 5000);
+
+            // Закрываем меню при клике на ссылку (для мобильных)
+            document.querySelectorAll('aside a').forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        const sidebar = document.getElementById('sidebar');
+                        const overlay = document.querySelector('.mobile-overlay');
+                        const menuBtn = document.querySelector('.mobile-menu-toggle');
+
+                        if (sidebar.classList.contains('mobile-open')) {
+                            toggleMobileMenu();
+                        }
+                    }
+                });
+            });
+
+            // Обработка выбора аватаров
+            document.querySelectorAll('.auth-avatars').forEach(function (container) {
+                container.addEventListener('click', function (e) {
+                    const label = e.target.closest('label');
+                    if (!label) return;
+
+                    const input = label.querySelector('input[type="radio"]');
+                    if (!input) return;
+
+                    container.querySelectorAll('label').forEach(function (l) {
+                        l.classList.remove('active');
+                    });
+
+                    label.classList.add('active');
+                    input.checked = true;
+                });
+            });
+        });
+    </script>
+</body>
+</html>

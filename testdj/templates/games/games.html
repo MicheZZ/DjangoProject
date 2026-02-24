@@ -1,0 +1,79 @@
+{% extends 'main/layout.html' %}
+
+{% block title %}Игры{% endblock %}
+
+{% block content %}
+<main>
+    <div class="features">
+        <div class="auth-box">
+            <h1><i class="fas fa-gamepad" style="color: #1e90ff;"></i> Игры</h1>
+            <p class="auth-subtitle">
+                Увлекательные игры для развлечения и развития логики
+            </p>
+
+            {% if not user.is_authenticated %}
+                <!-- Сообщение для неавторизованных пользователей -->
+                <div style="background: linear-gradient(135deg, #3a1f1f, #4d2a2a); border: 2px solid #ff6b6b; border-radius: 12px; padding: 40px; margin: 30px auto; max-width: 550px; box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);">
+                    <i class="fas fa-lock fa-4x" style="color: #ff6b6b; margin-bottom: 20px;"></i>
+                    <h3 style="color: #ff9999; margin-bottom: 20px; font-size: 26px; font-weight: 700;">
+                        Требуется авторизация
+                    </h3>
+                    <p style="color: #ccc; margin-bottom: 30px; font-size: 15px; line-height: 1.6;">
+                        Для доступа к играм необходимо войти в аккаунт или создать новый.
+                        Это займёт меньше минуты!
+                    </p>
+                    <div style="display: flex; gap: 15px; justify-content: center;">
+                        <a href="{% url 'login' %}" class="btn btn-primary" style="padding: 12px 30px; font-weight: 600;">
+                            <i class="fa-solid fa-right-to-bracket"></i> Войти
+                        </a>
+                        <a href="{% url 'register' %}" class="btn btn-outline-light" style="padding: 12px 30px; font-weight: 600;">
+                            <i class="fa-regular fa-user"></i> Регистрация
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <!-- Карточки игр для авторизованных пользователей -->
+                <div class="row" style="margin-top: 30px; width: 100%;">
+                    <div class="col-md-6 mb-4">
+                        <a href="{% url 'games:guess_number' %}"
+                           class="text-decoration-none"
+                           style="color: inherit; display: block; height: 100%;">
+                            <div class="card others-card shadow-sm"
+                                 style="background: #2b2b2b; border: 1px solid #555; border-radius: 12px; height: 100%;">
+                                <i class="fas fa-dice" style="color: #4CAF50;"></i>
+                                <h5>Угадай число</h5>
+                                <p class="text-muted">
+                                    Угадайте загаданное число и проверьте свою интуицию
+                                </p>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="col-md-6 mb-4">
+                        <a href="{% url 'games:blackjack' %}"
+                           class="text-decoration-none"
+                           style="color: inherit; display: block; height: 100%;">
+                            <div class="card others-card shadow-sm"
+                                 style="background: #2b2b2b; border: 1px solid #555; border-radius: 12px; height: 100%;">
+                                <i class="fas fa-cards" style="color: #ff6b6b;"></i>
+                                <h5>BlackJack</h5>
+                                <p class="text-muted">
+                                    Классическая карточная игра против дилера
+                                </p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Информация о балансе -->
+                <div style="background: #252525; border: 1px solid #444; border-radius: 10px; padding: 20px; margin-top: 20px; max-width: 600px; margin-left: auto; margin-right: auto; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);">
+                    <p style="margin: 0; color: #888; font-size: 14px; text-align: center;">
+                        <i class="fas fa-wallet" style="color: #4CAF50;"></i>
+                        Ваш текущий баланс: <strong style="color: #4CAF50; font-size: 18px; font-family: 'Courier New', monospace;">{{ user.profile.balance|floatformat:2 }}</strong>
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</main>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'main/layout.html' %}
+
+{% block title %}Профиль{% endblock %}
+
+{% block content %}
+<main>
+    <div class="features">
+        <div class="auth-box">
+            <h1><i class="fas fa-user-circle" style="color: #1e90ff;"></i> Профиль</h1>
+            <p class="auth-subtitle">
+                Смените аватар, добавьте информацию о себе и отслеживайте свой баланс
+            </p>
+
+            <div style="margin-bottom: 30px; text-align: center;">
+                <div style="font-size: 64px; margin-bottom: 12px;">
+                    {{ profile.avatar|default:"🙂" }}
+                </div>
+                <div style="font-size: 20px; color: #ddd; font-weight: 700; margin-bottom: 15px;">
+                    @{{ profile.user.username }}
+                </div>
+
+                <!-- Баланс -->
+                <div style="background: linear-gradient(135deg, #1f3a1f, #2a4d2a); border: 2px solid #4CAF50; border-radius: 12px; padding: 25px; margin-top: 20px; max-width: 350px; margin-left: auto; margin-right: auto; box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);">
+                    <p style="font-size: 13px; color: #a5d6a7; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 10px 0; font-weight: 700;">
+                        💰 Ваш баланс
+                    </p>
+                    <p style="font-size: 40px; color: #4CAF50; font-weight: 900; margin: 0; font-family: 'Courier New', monospace;">
+                        {{ profile.balance|floatformat:2 }}
+                    </p>
+                    <small style="color: #888; font-size: 12px; margin-top: 10px; display: block;">
+                        Используйте для ставок в играх
+                    </small>
+                </div>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div style="margin-top: 30px;">
+                    <label style="display: block; font-weight: bold; margin-bottom: 12px; text-align: left;">Выберите аватар</label>
+                    <div class="auth-avatars" style="margin-top: 8px; text-align: center;">
+                        {% for code, label in avatar_choices %}
+                            {% if profile.avatar == code %}
+                                <label class="active">
+                                    <input type="radio" name="avatar" value="{{ code }}" checked>
+                                    <span>{{ code }}</span>
+                                </label>
+                            {% else %}
+                                <label>
+                                    <input type="radio" name="avatar" value="{{ code }}">
+                                    <span>{{ code }}</span>
+                                </label>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <label for="bio" style="display: block; font-weight: bold; margin-bottom: 10px; text-align: left;">О себе</label>
+                    <textarea id="bio"
+                              name="bio"
+                              rows="5"
+                              placeholder="Расскажите немного о себе..."
+                              style="width: 100%; background-color: #2b2b2b; border: 1px solid #555;
+                                     border-radius: 6px; padding: 12px; color: #f5f5f5; resize: vertical; font-size: 14px; line-height: 1.6;">{{ profile.bio }}</textarea>
+                </div>
+
+                <button type="submit"
+                        class="btn btn-primary btn-block"
+                        style="margin-top: 30px; padding: 14px; font-size: 16px; font-weight: 700;">
+                    <i class="fas fa-save"></i> Сохранить изменения
+                </button>
+            </form>
+
+            <!-- Информация об аккаунте -->
+            <div style="background: #252525; border: 1px solid #444; border-radius: 8px; padding: 20px; margin-top: 30px; text-align: left;">
+                <h5 style="color: #888; font-size: 14px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">
+                    <i class="fas fa-info-circle"></i> Информация об аккаунте
+                </h5>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div>
+                        <p style="color: #666; font-size: 11px; margin: 0 0 4px 0; text-transform: uppercase;">Email</p>
+                        <p style="color: #fff; font-size: 13px; margin: 0;">{{ profile.user.email|default:"Не указан" }}</p>
+                    </div>
+                    <div>
+                        <p style="color: #666; font-size: 11px; margin: 0 0 4px 0; text-transform: uppercase;">Зарегистрирован</p>
+                        <p style="color: #fff; font-size: 13px; margin: 0;">
+                            {% if profile.created_at %}{{ profile.created_at|date:"d.m.Y" }}{% else %}Давно{% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

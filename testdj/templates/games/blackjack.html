@@ -1,0 +1,238 @@
+{% extends 'main/layout.html' %}
+
+{% block title %}BlackJack{% endblock %}
+
+{% block content %}
+<main>
+    <div class="features">
+        <div class="auth-box">
+            <h1><i class="fas fa-cards" style="color: #ff6b6b;"></i> BlackJack</h1>
+            <p class="auth-subtitle">
+                Классическая карточная игра. Попробуйте набрать 21 балл без превышения!
+            </p>
+
+            <div style="margin-top: 35px; max-width: 550px; margin-left: auto; margin-right: auto;">
+                <!-- Баланс -->
+                <div style="background: #252525; border: 1px solid #555; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                    <p style="color: #888; margin: 0 0 5px 0;">Текущий баланс</p>
+                    <div style="font-size: 28px; font-weight: bold; color: #4CAF50;" id="balance">{{ balance }}</div>
+                </div>
+
+                <!-- Настройки игры (появляются, если нет активной игры) -->
+                <div id="setupPanel" style="background: #252525; border: 1px solid #555; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                    <h3 style="color: #f5f5f5; margin-top: 0;">Настройки</h3>
+                    <div style="margin-bottom: 15px;">
+                        <label style="color: #888; display: block; margin-bottom: 5px;">Количество колод (1–8):</label>
+                        <input type="number" id="decksInput" min="1" max="8" value="1" style="width:100%; padding:10px; background:#2b2b2b; color:white; border:1px solid #555; border-radius:6px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="color: #888; display: block; margin-bottom: 5px;">Ваша ставка:</label>
+                        <input type="text" id="betInput" placeholder="Введите сумму" style="width:100%; padding:10px; background:#2b2b2b; color:white; border:1px solid #555; border-radius:6px;">
+                    </div>
+                    <button id="startGameBtn" class="btn btn-primary btn-block" style="padding:12px;">
+                        <i class="fas fa-play"></i> Начать игру
+                    </button>
+                </div>
+
+                <!-- Игровое поле (скрыто до начала игры) -->
+                <div id="gamePanel" style="display: none;">
+                    <!-- Карты дилера -->
+                    <div style="background: #252525; border: 1px solid #555; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                        <p style="color: #888; margin: 0 0 12px 0; font-size: 13px; font-weight: bold;">
+                            <i class="fas fa-user-tie"></i> Карты дилера
+                        </p>
+                        <div id="dealerCards" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
+                            <!-- Карты будут добавлены JS -->
+                        </div>
+                        <div style="background: #1f1f1f; padding: 10px; border-radius: 6px; text-align: center;">
+                            <span style="color: #ff6b6b; font-weight: bold;">Сумма: <span id="dealerSum">0</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Карты игрока -->
+                    <div style="background: #252525; border: 1px solid #555; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                        <p style="color: #888; margin: 0 0 12px 0; font-size: 13px; font-weight: bold;">
+                            <i class="fas fa-user"></i> Ваши карты
+                        </p>
+                        <div id="playerCards" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
+                            <!-- Карты будут добавлены JS -->
+                        </div>
+                        <div style="background: #1f1f1f; padding: 10px; border-radius: 6px; text-align: center;">
+                            <span style="color: #4CAF50; font-weight: bold;">Сумма: <span id="playerSum">0</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Результат -->
+                    <div id="resultMessage" style="display: none; background: #252525; border: 1px solid #555; border-radius: 8px; padding: 15px; margin-bottom: 20px; text-align: center; color: #888;"></div>
+
+                    <!-- Кнопки действий -->
+                    <div id="gameButtons" style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <button onclick="hit()" class="btn btn-success" style="flex: 1; padding: 12px;">
+                            <i class="fas fa-plus"></i> Ещё карту
+                        </button>
+                        <button onclick="stand()" class="btn btn-danger" style="flex: 1; padding: 12px;">
+                            <i class="fas fa-stop"></i> Стоп
+                        </button>
+                    </div>
+
+                    <button onclick="newGame()" class="btn btn-primary btn-block" style="padding: 12px;">
+                        <i class="fas fa-redo"></i> Новая игра
+                    </button>
+                </div>
+            </div>
+
+            <a href="{% url 'games:games' %}" class="btn btn-outline-secondary"
+               style="margin-top: 30px; padding: 10px 20px; display: inline-block;">
+                <i class="fas fa-arrow-left"></i> Вернуться
+            </a>
+        </div>
+    </div>
+</main>
+
+<script>
+    // CSRF-токен для AJAX
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    let gameActive = false;
+
+    // Функция для отображения карт
+    function renderCards(playerHand, dealerHand, playerSum, dealerSum) {
+        const playerDiv = document.getElementById('playerCards');
+        playerDiv.innerHTML = playerHand.map(c => {
+            if (c.hidden) return '<div style="background: #333; border: 2px solid #777; padding: 10px 8px; border-radius: 6px; min-width: 50px; text-align: center; color: #777;">?</div>';
+            const rank = c.rank;
+            const suit = c.suit;
+            return `<div style="background: #1f1f1f; border: 2px solid #4CAF50; padding: 10px 8px; border-radius: 6px; min-width: 50px; text-align: center; font-weight: bold; color: #4CAF50;">${rank}${suit}</div>`;
+        }).join('');
+
+        const dealerDiv = document.getElementById('dealerCards');
+        dealerDiv.innerHTML = dealerHand.map(c => {
+            if (c.hidden) return '<div style="background: #333; border: 2px solid #777; padding: 10px 8px; border-radius: 6px; min-width: 50px; text-align: center; color: #777;">?</div>';
+            const rank = c.rank;
+            const suit = c.suit;
+            return `<div style="background: #1f1f1f; border: 2px solid #ff6b6b; padding: 10px 8px; border-radius: 6px; min-width: 50px; text-align: center; font-weight: bold; color: #ff6b6b;">${rank}${suit}</div>`;
+        }).join('');
+
+        document.getElementById('playerSum').textContent = playerSum;
+        document.getElementById('dealerSum').textContent = dealerSum;
+    }
+
+    // Начало новой игры
+    document.getElementById('startGameBtn').addEventListener('click', function() {
+        const decks = document.getElementById('decksInput').value;
+        const bet = document.getElementById('betInput').value.trim();
+
+        fetch('', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
+            body: new URLSearchParams({
+                'action': 'start',
+                'decks': decks,
+                'bet': bet,
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert('Ошибка: ' + data.error);
+            } else if (data.status === 'cheat') {
+                document.getElementById('balance').textContent = data.balance;
+                alert('Код активирован! Баланс пополнен до 128000.');
+                document.getElementById('betInput').value = '';
+            } else if (data.status === 'started') {
+                gameActive = true;
+                document.getElementById('setupPanel').style.display = 'none';
+                document.getElementById('gamePanel').style.display = 'block';
+                document.getElementById('balance').textContent = data.balance;
+
+                renderCards(data.player_hand, data.dealer_hand, data.player_sum, data.dealer_sum);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+    // Ход игрока (взять карту)
+    window.hit = function() {
+        if (!gameActive) return;
+        fetch('', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
+            body: new URLSearchParams({
+                'action': 'hit',
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert('Ошибка: ' + data.error);
+            } else {
+                renderCards(data.player_hand, data.dealer_hand, data.player_sum, data.dealer_sum);
+                if (data.game_over) {
+                    gameActive = false;
+                    document.getElementById('gameButtons').style.display = 'none';
+                    document.getElementById('resultMessage').style.display = 'block';
+                    document.getElementById('resultMessage').innerHTML = `<strong>${data.message}</strong>`;
+                }
+                document.getElementById('balance').textContent = data.balance;
+            }
+        });
+    };
+
+    // Игрок останавливается
+    window.stand = function() {
+        if (!gameActive) return;
+        fetch('', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
+            body: new URLSearchParams({
+                'action': 'stand',
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert('Ошибка: ' + data.error);
+            } else {
+                gameActive = false;
+                document.getElementById('gameButtons').style.display = 'none';
+                document.getElementById('resultMessage').style.display = 'block';
+                document.getElementById('resultMessage').innerHTML = `<strong>${data.message}</strong>`;
+                renderCards(data.player_hand, data.dealer_hand, data.player_sum, data.dealer_sum);
+                document.getElementById('balance').textContent = data.balance;
+            }
+        });
+    };
+
+    // Новая игра (возврат к настройкам)
+    window.newGame = function() {
+        gameActive = false;
+        document.getElementById('setupPanel').style.display = 'block';
+        document.getElementById('gamePanel').style.display = 'none';
+        document.getElementById('resultMessage').style.display = 'none';
+        document.getElementById('gameButtons').style.display = 'flex';
+        // Очищаем поля (опционально)
+        document.getElementById('decksInput').value = 1;
+        document.getElementById('betInput').value = '';
+    };
+</script>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends 'main/layout.html' %}
+
+{% block title %}Остальное{% endblock %}
+
+{% block content %}
+<main>
+    <div class="features">
+        <div class="auth-box">
+            <h1>Остальные проекты</h1>
+            <p class="auth-subtitle">
+                Дополнительные утилиты и мини-приложения для разных задач.
+            </p>
+
+            <div class="row" style="margin-top: 30px; width: 100%;">
+                <div class="col-md-4 mb-4">
+                    <a href="{% url 'others:password_generator' %}"
+                       class="text-decoration-none"
+                       style="color: inherit; display: block; height: 100%;">
+                        <div class="card others-card shadow-sm"
+                             style="background: #2b2b2b; border: 1px solid #555; border-radius: 12px; height: 100%;">
+                            <i class="fas fa-key" style="color: #1e90ff;"></i>
+                            <h5>Генератор паролей</h5>
+                            <p class="text-muted">
+                                Создайте надёжный пароль за секунду
+                            </p>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <a href="{% url 'others:fortune_teller' %}"
+                       class="text-decoration-none"
+                       style="color: inherit; display: block; height: 100%;">
+                        <div class="card others-card shadow-sm"
+                             style="background: #2b2b2b; border: 1px solid #555; border-radius: 12px; height: 100%;">
+                            <i class="fas fa-magic" style="color: #ff6b6b;"></i>
+                            <h5>Предсказатель судьбы</h5>
+                            <p class="text-muted">
+                                Узнайте, что вас ждёт в будущем
+                            </p>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <a href="{% url 'others:number_converter' %}"
+                       class="text-decoration-none"
+                       style="color: inherit; display: block; height: 100%;">
+                        <div class="card others-card shadow-sm"
+                             style="background: #2b2b2b; border: 1px solid #555; border-radius: 12px; height: 100%;">
+                            <i class="fas fa-exchange-alt" style="color: #ffd700;"></i>
+                            <h5>Конвертер систем</h5>
+                            <p class="text-muted">
+                                Перевод чисел между системами счисления
+                            </p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

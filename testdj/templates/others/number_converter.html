@@ -1,0 +1,184 @@
+{% extends 'main/layout.html' %}
+
+{% block title %}Конвертер систем счисления{% endblock %}
+
+{% block content %}
+<main>
+    <div class="features">
+        <div class="auth-box">
+            <h1><i class="fas fa-exchange-alt" style="color: #ffd700;"></i> Конвертер систем счисления</h1>
+            <p class="auth-subtitle">
+                Переводите числа между любыми системами счисления (от 2 до 36)
+            </p>
+
+            <form method="post" style="margin-top: 35px; max-width: 550px; margin-left: auto; margin-right: auto;">
+                {% csrf_token %}
+
+                <!-- Исходное число -->
+                <div class="form-group">
+                    <label for="number" style="font-weight: bold; text-align: left; display: block;">
+                        Введите число
+                    </label>
+                    <input type="text" id="number" name="number" placeholder="Например: 255, FF, 11111111"
+                           style="width: 100%; padding: 12px; background-color: #2b2b2b;
+                                  border: 1px solid #555; border-radius: 6px; color: #f5f5f5;
+                                  font-size: 16px; font-family: monospace;"
+                           value="{{ result.original|default:'' }}">
+                    <small style="color: #888; display: block; margin-top: 6px;">
+                        💡 Подсказка: для систем > 10 используйте буквы (A=10, B=11, ..., Z=35)
+                    </small>
+                </div>
+
+                <!-- Исходная система счисления -->
+                <div class="form-group">
+                    <label for="from_base" style="font-weight: bold; text-align: left; display: block;">
+                        Из какой системы счисления (2-36)
+                    </label>
+                    <input type="number" id="from_base" name="from_base" min="2" max="36" value="{{ result.from_base|default:'10' }}"
+                           style="width: 100%; padding: 12px; background-color: #2b2b2b;
+                                  border: 1px solid #555; border-radius: 6px; color: #f5f5f5;
+                                  font-size: 16px;">
+                    <div style="margin-top: 8px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px;">
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="setFromBase(2)" style="padding: 6px; font-size: 11px;">2</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="setFromBase(8)" style="padding: 6px; font-size: 11px;">8</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="setFromBase(10)" style="padding: 6px; font-size: 11px;">10</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="setFromBase(16)" style="padding: 6px; font-size: 11px;">16</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="setFromBase(32)" style="padding: 6px; font-size: 11px;">32</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="setFromBase(36)" style="padding: 6px; font-size: 11px;">36</button>
+                    </div>
+                </div>
+
+                <!-- Целевая система счисления -->
+                <div class="form-group">
+                    <label for="to_base" style="font-weight: bold; text-align: left; display: block;">
+                        В какую систему счисления (2-36)
+                    </label>
+                    <input type="number" id="to_base" name="to_base" min="2" max="36" value="{{ result.to_base|default:'16' }}"
+                           style="width: 100%; padding: 12px; background-color: #2b2b2b;
+                                  border: 1px solid #555; border-radius: 6px; color: #f5f5f5;
+                                  font-size: 16px;">
+                    <div style="margin-top: 8px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px;">
+                        <button type="button" class="btn btn-sm btn-outline-success" onclick="setToBase(2)" style="padding: 6px; font-size: 11px;">2</button>
+                        <button type="button" class="btn btn-sm btn-outline-success" onclick="setToBase(8)" style="padding: 6px; font-size: 11px;">8</button>
+                        <button type="button" class="btn btn-sm btn-outline-success" onclick="setToBase(10)" style="padding: 6px; font-size: 11px;">10</button>
+                        <button type="button" class="btn btn-sm btn-outline-success" onclick="setToBase(16)" style="padding: 6px; font-size: 11px;">16</button>
+                        <button type="button" class="btn btn-sm btn-outline-success" onclick="setToBase(32)" style="padding: 6px; font-size: 11px;">32</button>
+                        <button type="button" class="btn btn-sm btn-outline-success" onclick="setToBase(36)" style="padding: 6px; font-size: 11px;">36</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block"
+                        style="margin-top: 25px; padding: 14px; font-size: 16px; font-weight: bold;">
+                    <i class="fas fa-arrow-right"></i> Конвертировать
+                </button>
+            </form>
+
+            {% if error %}
+                <div class="alert alert-danger" style="margin-top: 25px; max-width: 550px; margin-left: auto; margin-right: auto;">
+                    <i class="fas fa-exclamation-circle"></i> {{ error }}
+                </div>
+            {% endif %}
+
+            {% if result %}
+                <div style="margin-top: 35px; max-width: 550px; margin-left: auto; margin-right: auto;">
+                    <!-- Оригинальное число -->
+                    <div style="background: #252525; border: 1px solid #555; border-radius: 8px; padding: 20px; margin-bottom: 15px;">
+                        <p style="color: #888; margin: 0 0 8px 0; font-size: 13px;">
+                            <i class="fas fa-arrow-circle-left" style="color: #ffd700;"></i>
+                            Число в системе с основанием <strong>{{ result.from_base }}</strong>
+                        </p>
+                        <div style="background: #1f1f1f; padding: 12px; border-radius: 6px; font-family: monospace; font-size: 18px; color: #ffd700;">
+                            {{ result.original }}
+                        </div>
+                    </div>
+
+                    <!-- Десятичная система -->
+                    <div style="background: #252525; border: 1px solid #555; border-radius: 8px; padding: 20px; margin-bottom: 15px;">
+                        <p style="color: #888; margin: 0 0 8px 0; font-size: 13px;">
+                            <i class="fas fa-calculator" style="color: #1e90ff;"></i>
+                            Десятичное представление
+                        </p>
+                        <div style="background: #1f1f1f; padding: 12px; border-radius: 6px; font-family: monospace; font-size: 18px; color: #1e90ff;">
+                            {{ result.decimal }}
+                        </div>
+                    </div>
+
+                    <!-- Результат конвертации -->
+                    <div style="background: linear-gradient(135deg, #1f3a1f 0%, #2a4d2a 100%); border: 2px solid #4CAF50; border-radius: 8px; padding: 20px;">
+                        <p style="color: #4CAF50; margin: 0 0 8px 0; font-size: 13px; font-weight: bold;">
+                            <i class="fas fa-arrow-circle-right" style="color: #4CAF50;"></i>
+                            РЕЗУЛЬТАТ: Число в системе с основанием <strong>{{ result.to_base }}</strong>
+                        </p>
+                        <div style="background: #1f1f1f; padding: 15px; border-radius: 6px; font-family: monospace; font-size: 20px; color: #4CAF50; word-break: break-all; user-select: all; cursor: pointer;"
+                             onclick="copyResult()">
+                            {{ result.converted }}
+                        </div>
+                        <small style="color: #888; margin-top: 8px; display: block; cursor: pointer; text-align: center;"
+                               onclick="copyResult()">
+                            👆 Кликните, чтобы скопировать
+                        </small>
+                    </div>
+
+                    <!-- Информация о системах -->
+                    <div style="margin-top: 20px; padding: 15px; background: #252525; border-radius: 8px; border-left: 4px solid #ffd700;">
+                        <p style="margin: 0; color: #888; font-size: 12px;">
+                            <strong style="color: #ffd700;">📌 Подсказка:</strong>
+                            Системы счисления с основанием > 10 используют буквы (A=10, B=11, C=12... Z=35)
+                        </p>
+                    </div>
+                </div>
+            {% else %}
+                <div style="margin-top: 35px; max-width: 550px; margin-left: auto; margin-right: auto; text-align: center; color: #888;">
+                    <p style="font-size: 48px; margin: 0 0 15px 0;">🔢</p>
+                    <p>Введите число и выберите системы счисления для конвертации</p>
+
+                    <div style="margin-top: 25px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        <div style="background: #252525; padding: 15px; border-radius: 8px; border-left: 3px solid #ffd700;">
+                            <p style="margin: 0 0 8px 0; color: #ffd700; font-weight: bold;">Примеры:</p>
+                            <small style="color: #888;">
+                                255₁₀ → FF₁₆<br>
+                                1010₂ → 10₁₀<br>
+                                100₈ → 64₁₀<br>
+                                ZZZZ₃₆ → 1679615₁₀
+                            </small>
+                        </div>
+                        <div style="background: #252525; padding: 15px; border-radius: 8px; border-left: 3px solid #1e90ff;">
+                            <p style="margin: 0 0 8px 0; color: #1e90ff; font-weight: bold;">Системы:</p>
+                            <small style="color: #888;">
+                                От 2 до 36<br>
+                                Быстро и точно<br>
+                                Без ограничений<br>
+                                Кастомные базисы
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <a href="{% url 'others:others' %}" class="btn btn-outline-secondary"
+               style="margin-top: 30px; padding: 10px 20px; display: inline-block;">
+                <i class="fas fa-arrow-left"></i> Вернуться
+            </a>
+        </div>
+    </div>
+</main>
+
+<script>
+    function setFromBase(base) {
+        document.getElementById('from_base').value = base;
+    }
+
+    function setToBase(base) {
+        document.getElementById('to_base').value = base;
+    }
+
+    function copyResult() {
+        const resultText = document.querySelector('div[style*="20px; color: #4CAF50"]').textContent.trim();
+        navigator.clipboard.writeText(resultText).then(() => {
+            alert('✅ Результат скопирован!');
+        }).catch(() => {
+            alert('❌ Не удалось скопировать');
+        });
+    }
+</script>
+{% endblock %}

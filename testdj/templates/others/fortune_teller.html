@@ -1,0 +1,180 @@
+{% extends 'main/layout.html' %}
+
+{% block title %}Предсказатель судьбы{% endblock %}
+
+{% block content %}
+<main>
+    <div class="features">
+        <div class="auth-box">
+            <h1><i class="fas fa-magic" style="color: #ff6b6b;"></i> Предсказатель судьбы</h1>
+            <p class="auth-subtitle">
+                Передвиньте ползунок и узнайте ответ на ваш вопрос
+            </p>
+
+            <form method="post" style="margin-top: 35px; max-width: 500px; margin-left: auto; margin-right: auto;">
+                {% csrf_token %}
+
+                <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 14px; color: #888; font-weight: bold;">Скорее НЕТ</span>
+                    <span style="font-size: 18px; font-weight: bold; color: #fff;">
+                        <span id="biasDisplay">50</span>%
+                    </span>
+                    <span style="font-size: 14px; color: #888; font-weight: bold;">Скорее ДА</span>
+                </div>
+
+                <input type="range" id="bias" name="bias" min="0" max="100" value="50"
+                       style="width: 100%; height: 8px; border-radius: 5px; background: linear-gradient(to right, #ff6b6b 0%, #ff6b6b 50%, #4CAF50 50%, #4CAF50 100%);
+                              outline: none; -webkit-appearance: none; appearance: none; cursor: pointer;"
+                       oninput="updateSlider(this)">
+
+                <div style="display: flex; justify-content: space-between; margin-top: 15px; gap: 10px;">
+                    <div style="flex: 1; text-align: center; padding: 10px; background: #3a1f1f; border-radius: 6px; border-left: 3px solid #ff6b6b;">
+                        <span style="color: #ff6b6b; font-size: 12px;">ВЕРОЯТНОСТЬ НЕТ</span>
+                        <p style="margin: 5px 0 0 0; color: #fff; font-size: 14px; font-weight: bold;">
+                            <span id="noChance">50</span>%
+                        </p>
+                    </div>
+                    <div style="flex: 1; text-align: center; padding: 10px; background: #1f3a1f; border-radius: 6px; border-right: 3px solid #4CAF50;">
+                        <span style="color: #4CAF50; font-size: 12px;">ВЕРОЯТНОСТЬ ДА</span>
+                        <p style="margin: 5px 0 0 0; color: #fff; font-size: 14px; font-weight: bold;">
+                            <span id="yesChance">50</span>%
+                        </p>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block"
+                        style="margin-top: 25px; padding: 14px; font-size: 16px; font-weight: bold;">
+                    <i class="fas fa-sparkles"></i> Получить предсказание
+                </button>
+            </form>
+
+            {% if error %}
+                <div class="alert alert-danger" style="margin-top: 25px; max-width: 500px; margin-left: auto; margin-right: auto;">
+                    <i class="fas fa-exclamation-circle"></i> {{ error }}
+                </div>
+            {% endif %}
+
+            {% if prediction %}
+                <div style="margin-top: 35px; max-width: 500px; margin-left: auto; margin-right: auto;">
+                    <div style="background: {% if prediction.type_class == 'yes' %}linear-gradient(135deg, #1f3a1f 0%, #2a4d2a 100%){% else %}linear-gradient(135deg, #3a1f1f 0%, #4d2a2a 100%){% endif %};
+                                border: 2px solid {% if prediction.type_class == 'yes' %}#4CAF50{% else %}#ff6b6b{% endif %};
+                                border-radius: 12px; padding: 30px; text-align: center; animation: fadeIn 0.5s ease-in;">
+
+                        <p style="color: {% if prediction.type_class == 'yes' %}#4CAF50{% else %}#ff9999{% endif %};
+                                  font-size: 18px; font-weight: bold; margin: 0 0 20px 0;">
+                            {{ prediction.type }}
+                        </p>
+
+                        <div style="background: #1f1f1f; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
+                            <p style="font-size: 28px; color: {% if prediction.type_class == 'yes' %}#4CAF50{% else %}#ff6b6b{% endif %};
+                                      margin: 0 0 15px 0; font-weight: bold;">
+                                {% if prediction.type_class == 'yes' %}
+                                    ✅ ДА
+                                {% else %}
+                                    ❌ НЕТ
+                                {% endif %}
+                            </p>
+                            <p style="font-size: 18px; color: #fff; margin: 0; line-height: 1.6;">
+                                {{ prediction.text }}
+                            </p>
+                        </div>
+
+                        <div style="background: #252525; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                            <p style="margin: 0; color: #888; font-size: 13px;">
+                                Уровень уверенности: <strong style="color: {% if prediction.type_class == 'yes' %}#4CAF50{% else %}#ff6b6b{% endif %};">{{ prediction.confidence }}%</strong>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px; padding: 15px; background: #252525; border-radius: 8px; border-left: 4px solid #FFC107;">
+                        <p style="margin: 0; color: #888; font-size: 13px;">
+                            <i class="fas fa-lightbulb" style="color: #FFC107;"></i>
+                            Это всего лишь развлечение! Полагайтесь на свою интуицию и разум! 🎭
+                        </p>
+                    </div>
+                </div>
+            {% else %}
+                <div style="margin-top: 35px; max-width: 500px; margin-left: auto; margin-right: auto; text-align: center; color: #888;">
+                    <p style="font-size: 48px; margin: 0 0 15px 0;">🔮</p>
+                    <p>Задайте вопрос, передвиньте ползунок и узнайте ответ</p>
+                </div>
+            {% endif %}
+
+            <a href="{% url 'others:others' %}" class="btn btn-outline-secondary"
+               style="margin-top: 30px; padding: 10px 20px; display: inline-block;">
+                <i class="fas fa-arrow-left"></i> Вернуться
+            </a>
+        </div>
+    </div>
+</main>
+
+<style>
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #fff;
+        cursor: pointer;
+        border: 3px solid #1e90ff;
+        box-shadow: 0 0 10px rgba(30, 144, 255, 0.5);
+        transition: all 0.2s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+        box-shadow: 0 0 15px rgba(30, 144, 255, 0.8);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #fff;
+        cursor: pointer;
+        border: 3px solid #1e90ff;
+        box-shadow: 0 0 10px rgba(30, 144, 255, 0.5);
+        transition: all 0.2s ease;
+    }
+
+    input[type="range"]::-moz-range-thumb:hover {
+        transform: scale(1.2);
+        box-shadow: 0 0 15px rgba(30, 144, 255, 0.8);
+    }
+</style>
+
+<script>
+    function updateSlider(slider) {
+        const value = parseInt(slider.value);
+        const yesChance = value;
+        const noChance = 100 - value;
+
+        document.getElementById('biasDisplay').textContent = value;
+        document.getElementById('yesChance').textContent = yesChance;
+        document.getElementById('noChance').textContent = noChance;
+
+        // Меняем градиент ползунка в зависимости от положения
+        slider.style.background = `linear-gradient(to right, #ff6b6b 0%, #ff6b6b ${value}%, #4CAF50 ${value}%, #4CAF50 100%)`;
+    }
+
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        const slider = document.getElementById('bias');
+        if (slider) {
+            updateSlider(slider);
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends 'main/layout.html' %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<main>
+    <div class="features">
+        <div class="auth-box">
+            <h1>Регистрация</h1>
+            <p class="auth-subtitle">
+                Создай аккаунт, выбери аватар и получи удобный доступ ко всем проектам.
+            </p>
+
+            <!-- Сообщения об ошибках -->
+            {% if form.errors %}
+                <div style="background: linear-gradient(135deg, #3a1f1f, #4d2a2a); border: 2px solid #ff6b6b; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                    <p style="color: #ff6b6b; font-weight: 700; margin: 0 0 10px 0;">
+                        <i class="fas fa-exclamation-circle"></i> Ошибки при регистрации:
+                    </p>
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            <p style="color: #ff9999; margin: 5px 0; font-size: 14px;">• {{ error }}</p>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+
+                <label for="{{ form.username.id_for_label }}">Логин</label>
+                {{ form.username }}
+                {% if form.username.help_text %}
+                    <small style="color: #888; display: block; margin-top: 4px;">{{ form.username.help_text }}</small>
+                {% endif %}
+
+                <label for="{{ form.password1.id_for_label }}">Пароль</label>
+                {{ form.password1 }}
+                {% if form.password1.help_text %}
+                    <small style="color: #888; display: block; margin-top: 4px;">{{ form.password1.help_text|safe }}</small>
+                {% endif %}
+
+                <label for="{{ form.password2.id_for_label }}">Повтор пароля</label>
+                {{ form.password2 }}
+
+                <div style="margin-top: 15px;">
+                    <span>Аватар</span>
+                    <div class="auth-avatars" style="margin-top: 8px;">
+                        {% for code, label in avatar_choices %}
+                            {% if form.data.avatar %}
+                                {% if form.data.avatar == code %}
+                                    <label class="active">
+                                        <input type="radio" name="avatar" value="{{ code }}" checked>
+                                        <span>{{ code }}</span>
+                                    </label>
+                                {% else %}
+                                    <label>
+                                        <input type="radio" name="avatar" value="{{ code }}">
+                                        <span>{{ code }}</span>
+                                    </label>
+                                {% endif %}
+                            {% else %}
+                                {% if form.initial.avatar == code %}
+                                    <label class="active">
+                                        <input type="radio" name="avatar" value="{{ code }}" checked>
+                                        <span>{{ code }}</span>
+                                    </label>
+                                {% else %}
+                                    <label>
+                                        <input type="radio" name="avatar" value="{{ code }}">
+                                        <span>{{ code }}</span>
+                                    </label>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <button type="submit"
+                        class="btn btn-primary btn-block"
+                        style="margin-top: 22px;">
+                    Зарегистрироваться
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                Уже есть аккаунт?
+                <a href="{% url 'login' %}">Войти</a>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
