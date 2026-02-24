@@ -55,10 +55,9 @@ def fortune_teller(request):
             if bias < 0 or bias > 100:
                 error = 'Значение должно быть от 0 до 100'
             else:
-                # Генерируем случайное число от 0 до 100
+                # Случайное число от 0 до 100
                 random_value = random.randint(0, 100)
 
-                # Предсказания
                 yes_predictions = [
                     '✨ Да, конечно! Это произойдёт!',
                     '🌟 Да, всё сложится отлично!',
@@ -135,13 +134,10 @@ def number_converter(request):
                 error = 'Целевая система счисления должна быть от 2 до 36'
             else:
                 try:
-                    # Проверяем корректность числа для исходной системы
                     validate_number(number, from_base)
 
-                    # Конвертируем из исходной системы в десятичную
                     decimal_value = int(number, from_base)
 
-                    # Конвертируем из десятичной в целевую систему
                     if to_base == 10:
                         converted = str(decimal_value)
                     else:
